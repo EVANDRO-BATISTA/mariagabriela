@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 const skills = [
   ["Procedimentos clínicos", "Punção venosa, sondagem nasogástrica e vesical, curativos complexos e cuidados com feridas."],
@@ -9,22 +9,36 @@ const skills = [
   ["Atitudes profissionais", "Comunicação assertiva, trabalho em equipe, ética e empatia no atendimento humanizado."],
 ];
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const themeStorageKey = "maria-gabriela-theme";
+
+function getThemeSnapshot() {
+  if (typeof window === "undefined") return false;
+  const savedTheme = window.localStorage.getItem(themeStorageKey);
+  return savedTheme ? savedTheme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function subscribeToTheme(onThemeChange: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  window.addEventListener("storage", onThemeChange);
+  window.addEventListener("maria-gabriela-theme-change", onThemeChange);
+  mediaQuery.addEventListener("change", onThemeChange);
+
+  return () => {
+    window.removeEventListener("storage", onThemeChange);
+    window.removeEventListener("maria-gabriela-theme-change", onThemeChange);
+    mediaQuery.removeEventListener("change", onThemeChange);
+  };
+}
+
 export default function Home() {
   const [photoAvailable, setPhotoAvailable] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("maria-gabriela-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDarkMode(savedTheme ? savedTheme === "dark" : prefersDark);
-  }, []);
+  const darkMode = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => false);
 
   function toggleTheme() {
-    setDarkMode((currentMode) => {
-      const nextMode = !currentMode;
-      window.localStorage.setItem("maria-gabriela-theme", nextMode ? "dark" : "light");
-      return nextMode;
-    });
+    const nextMode = !darkMode;
+    window.localStorage.setItem(themeStorageKey, nextMode ? "dark" : "light");
+    window.dispatchEvent(new Event("maria-gabriela-theme-change"));
   }
 
   return (
@@ -32,12 +46,12 @@ export default function Home() {
       <nav className="site-nav" aria-label="Navegação principal">
         <a className="monogram" href="#inicio" aria-label="Maria Gabriela, início">MG<span>.</span></a>
         <div className="nav-links"><a href="#sobre">Sobre mim</a><a href="#experiencia">Experiência</a><a href="#competencias">Competências</a><a href="#contato">Contato</a></div>
-        <div className="nav-actions"><button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={darkMode ? "Ativar tema claro" : "Ativar tema escuro"} title={darkMode ? "Tema claro" : "Tema escuro"}><span aria-hidden="true">{darkMode ? "☼" : "☾"}</span></button><a className="nav-download" href="/documents/curriculo-maria-gabriela.pdf" download><span>Baixar currículo</span><span aria-hidden="true">↗</span></a></div>
+        <div className="nav-actions"><button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={darkMode ? "Ativar tema claro" : "Ativar tema escuro"} title={darkMode ? "Tema claro" : "Tema escuro"}><span aria-hidden="true">{darkMode ? "☼" : "☾"}</span></button><a className="nav-download" href={`${basePath}/documents/curriculo-maria-gabriela.pdf`} download><span>Baixar currículo</span><span aria-hidden="true">↗</span></a></div>
       </nav>
 
       <section className="hero" id="inicio">
-        <div className="hero-copy"><p className="eyebrow"><span className="eyebrow-mark" />Enfermagem com presença e propósito</p><h1>Maria Gabriela<br /><em>de Oliveira Nery</em></h1><p className="hero-intro">Cuidado que combina precisão clínica, escuta atenta e uma visão verdadeiramente humana.</p><div className="hero-actions"><a className="button button-dark" href="#sobre">Conheça minha trajetória <span>↓</span></a><a className="text-link" href="/documents/curriculo-maria-gabriela.pdf" download>Currículo em PDF <span>↗</span></a></div></div>
-        <div className="hero-visual"><div className="visual-note note-top">Atenção<br /><strong>humanizada</strong></div><div className="portrait-frame"><div className="portrait-fallback" aria-hidden="true"><span>MG</span></div>{photoAvailable && <img className="portrait" src="/images/maria-gabriela.jpg" alt="Foto de apresentação de Maria Gabriela de Oliveira Nery" onError={() => setPhotoAvailable(false)} />}<div className="portrait-caption"><span>01</span><span>Porto Velho / RO</span></div></div><div className="visual-note note-bottom">COREN-RO<br /><strong>1012471</strong></div></div>
+        <div className="hero-copy"><p className="eyebrow"><span className="eyebrow-mark" />Enfermagem com presença e propósito</p><h1>Maria Gabriela<br /><em>de Oliveira Nery</em></h1><p className="hero-intro">Cuidado que combina precisão clínica, escuta atenta e uma visão verdadeiramente humana.</p><div className="hero-actions"><a className="button button-dark" href="#sobre">Conheça minha trajetória <span>↓</span></a><a className="text-link" href={`${basePath}/documents/curriculo-maria-gabriela.pdf`} download>Currículo em PDF <span>↗</span></a></div></div>
+        <div className="hero-visual"><div className="visual-note note-top">Atenção<br /><strong>humanizada</strong></div><div className="portrait-frame"><div className="portrait-fallback" aria-hidden="true"><span>MG</span></div>{photoAvailable && <img className="portrait" src={`${basePath}/images/maria-gabriela.jpg`} alt="Foto de apresentação de Maria Gabriela de Oliveira Nery" onError={() => setPhotoAvailable(false)} />}<div className="portrait-caption"><span>01</span><span>Porto Velho / RO</span></div></div><div className="visual-note note-bottom">COREN-RO<br /><strong>1012471</strong></div></div>
       </section>
 
       <section className="ticker" aria-label="Áreas de atuação"><span>ATENÇÃO PRIMÁRIA</span><i /> <span>URGÊNCIA &amp; EMERGÊNCIA</span><i /> <span>MATERNIDADE</span><i /> <span>SEGURANÇA DO PACIENTE</span></section>

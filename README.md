@@ -1,3 +1,29 @@
+
+# Portfólio Maria Gabriela
+
+Portfólio profissional desenvolvido com Next.js e publicado no GitHub Pages.
+
+## Desenvolvimento local
+
+```bash
+npm install
+npm run dev
+```
+
+Abra `http://localhost:3000` no navegador.
+
+## Publicação no GitHub Pages
+
+O workflow em `.github/workflows/deploy.yml` publica automaticamente cada push na branch `main`.
+
+No GitHub, acesse **Settings > Pages** e selecione **GitHub Actions** como fonte de publicação. O site ficará disponível em:
+
+`https://evandro-batista.github.io/mariagabriela/`
+
+Adicione os arquivos reais da apresentação em:
+
+- `public/images/maria-gabriela.jpg`
+- `public/documents/curriculo-maria-gabriela.pdf`
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
