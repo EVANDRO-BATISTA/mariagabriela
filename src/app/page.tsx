@@ -9,7 +9,7 @@ const skills = [
   ["Atitudes profissionais", "Comunicação assertiva, trabalho em equipe, ética e empatia no atendimento humanizado."],
 ];
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (process.env.NODE_ENV === "production" ? "/mariagabriela" : "");
 const themeStorageKey = "maria-gabriela-theme";
 
 function getThemeSnapshot() {
